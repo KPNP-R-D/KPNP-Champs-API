@@ -71,6 +71,8 @@ paths:
     $ref: './tags/poomsae/common.yaml#/paths/~1competition~1{competitionSeq}~1event-filter'
   /common/competition/{competitionSeq}/operation/match-filter:
     $ref: './tags/poomsae/common.yaml#/paths/~1common~1competition~1{competitionSeq}~1operation~1match-filter'
+  /common/competition/{competitionSeq}/operation/cutoff-rtds-filter:
+    $ref: './tags/poomsae/common.yaml#/paths/~1common~1competition~1{competitionSeq}~1operation~1cutoff-rtds-filter'
   /common/competition/{competitionSeq}/matches/{competitionMatchPsSeq}/results:
     $ref: './tags/poomsae/common.yaml#/paths/~1common~1competition~1{competitionSeq}~1matches~1{competitionMatchPsSeq}~1results'
 
@@ -238,6 +240,8 @@ paths:
     $ref: './tags/poomsae/operation.yaml#/paths/~1competitions~1{competitionSeq}~1operation~1matches~1first-round'
   /competitions/{competitionSeq}/operation/matches/rtds:
     $ref: './tags/poomsae/operation.yaml#/paths/~1competitions~1{competitionSeq}~1operation~1matches~1rtds'
+  /competitions/{competitionSeq}/operation/matches/rtds/cutoff:
+    $ref: './tags/poomsae/operation.yaml#/paths/~1competitions~1{competitionSeq}~1operation~1matches~1rtds~1cutoff'
   /competitions/{competitionSeq}/operation/status-bar:
     $ref: './tags/poomsae/operation.yaml#/paths/~1competitions~1{competitionSeq}~1operation~1status-bar'
   /competitions/{competitionSeq}/operation/matches/progress/{day}:

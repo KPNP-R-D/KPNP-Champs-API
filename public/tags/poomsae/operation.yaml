@@ -4340,9 +4340,12 @@
 
   /competitions/{competitionSeq}/operation/matches/rtds:
     get:
-      summary: 운영 - RTDS 조회
+      summary: 운영 - RTDS 조회 (토너먼트 전용)
       description: |
         실시간 경기 운영용 RTDS 데이터를 조회한다.
+
+        **토너먼트 경기만 내려준다.** 컷오프 경기는 컷오프 RTDS 조회
+        (`GET /competitions/{competitionSeq}/operation/matches/rtds/cutoff`)로 분리됐다.
       tags:
         - 운영 - 경기
       parameters:
@@ -4413,7 +4416,8 @@
                               description: 경기 강수
                             cutoffGroup:
                               type: string
-                              description: 컷오프일때 컷오프 조 ( 토너먼트와 컷오프 F은 null)
+                              nullable: true
+                              description: 항상 null (토너먼트 전용 API — 컷오프 경기는 컷오프 RTDS로 분리)
                             divisionCode:
                               type: string
                               description: 룰 코드
@@ -4443,7 +4447,7 @@
                               description: 대회 유형 이름(영문)
                             matchStyleType:
                               type: string
-                              description: 매치 유형 (CUTOFF or TOURNAMENT)
+                              description: 매치 유형 (항상 TOURNAMENT)
                             matchMinTime:
                               type: integer
                               description: 경기 최소 진행 시간(초)
@@ -4977,6 +4981,276 @@
                 MATCH_COMPETITOR_DETAIL_NOT_FOUND:
                   $ref: '../../components/examples.yaml#/MATCH_COMPETITOR_DETAIL_NOT_FOUND'
 
+        '403':
+          description: 권한 없음
+          content:
+            application/json:
+              schema:
+                $ref: '../../components/responses.yaml#/Error'
+              examples:
+                IS_NOT_AUTHORIZED:
+                  $ref: '../../components/examples.yaml#/IS_NOT_AUTHORIZED'
+
+  /competitions/{competitionSeq}/operation/matches/rtds/cutoff:
+    get:
+      summary: 운영 - 컷오프 RTDS 조회
+      description: |
+        룰·부·대회유형·강수·그룹 필터로 특정한 **컷오프 그룹**의 RTDS 데이터를 조회한다.
+        코트와 무관하게 해당 그룹의 경기를 모두 내려준다 (여러 코트에 분산돼 동시 진행되는 경우 포함).
+
+        - **Current Rank**: 완료(END)된 선수의 현재 순위·점수. 기권(WDR)·실격(DSQ)은 순위 대신
+          결과 코드로 표기하고 점수는 `0.000`.
+        - **Starting Order**: 완료되지 않은 경기 목록 — 코트 → sort_no 순(코트뷰어의 순서 변경 반영).
+          `matchStatus`로 Running(ONGOING)/Waiting(WAITING)을 구분한다.
+        - 실시간 갱신은 FOP READY/FINISH 소켓 이벤트가 담당하며, 이 API는 초기 로드·재동기화 용도다.
+
+        필터 값은 컷오프 RTDS 표출 그룹 설정 필터
+        (`GET /common/competition/{competitionSeq}/operation/cutoff-rtds-filter`) 응답에서 고른다.
+      tags:
+        - 운영 - 경기
+      parameters:
+        - name: competitionSeq
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 대회 고유 시퀀스
+        - name: division
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 룰 코드 (예 WT_RECOGNIZED_POOMSAE)
+        - name: department
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 부 코드 (예 CADET, 오픈룰이면 오픈 부 명칭)
+        - name: divisionCategory
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 대회 유형 코드 (예 INDIVIDUAL_MALE)
+        - name: phase
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [PRE, SF, F]
+          description: 강수
+        - name: cutoffGroup
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 그룹 (A/B/C). F(결승) 강수는 그룹이 없으므로 생략한다
+      responses:
+        '200':
+          description: 컷오프 RTDS 데이터를 성공적으로 조회한 경우
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      competitionName:
+                        type: string
+                        description: 대회명
+                      competitionTimezone:
+                        type: string
+                        description: 대회 타임존
+                      hostLogoUrl:
+                        type: string
+                        nullable: true
+                        description: 주최 로고 URL (없으면 kpnp 기본 로고 사용)
+                      competitionLogUrl:
+                        type: string
+                        nullable: true
+                        description: 대회 로고 URL
+                      competitionLocation:
+                        type: string
+                        description: 대회 개최 장소
+                      competitionLocalYn:
+                        type: string
+                        enum: [W, L]
+                        description: 대회 구분 (W = 국제, L = 한국/로컬 — 로컬이면 국기/NOC 영역에 팀 표기)
+                      selectedFilter:
+                        type: object
+                        description: 선택한 필터 표기 정보 (화면 우상단 Rule/Division/Department/Phase/Group)
+                        properties:
+                          divisionCode:
+                            type: string
+                            description: 룰 코드
+                          divisionNameKo:
+                            type: string
+                            description: 룰 이름(국문)
+                          divisionNameEn:
+                            type: string
+                            description: 룰 이름(영문)
+                          departmentCode:
+                            type: string
+                            description: 부 코드
+                          departmentNameKo:
+                            type: string
+                            description: 부 이름(국문)
+                          departmentNameEn:
+                            type: string
+                            description: 부 이름(영문)
+                          divisionCategoryCode:
+                            type: string
+                            description: 대회 유형 코드
+                          divisionCategoryNameKo:
+                            type: string
+                            description: 대회 유형 이름(국문)
+                          divisionCategoryNameEn:
+                            type: string
+                            description: 대회 유형 이름(영문)
+                          phase:
+                            type: string
+                            description: 강수 (PRE/SF/F)
+                          cutoffGroup:
+                            type: string
+                            nullable: true
+                            description: 그룹 (A/B/C — F는 null)
+                      remainCompetitorCount:
+                        type: integer
+                        description: 대기중인 선수 수 (FINISH로 점수 확정된 선수 제외)
+                      totalCompetitorCount:
+                        type: integer
+                        description: 그룹에 참가한 총 선수 수
+                      currentRankList:
+                        type: array
+                        description: 현재 순위 리스트 (완료된 선수만, 랭킹 순 — WDR/DSQ는 맨 뒤)
+                        items:
+                          type: object
+                          properties:
+                            competitionMatchPsSeq:
+                              type: integer
+                              description: 경기 시퀀스
+                            ranking:
+                              type: string
+                              description: 순위 숫자, 기권/실격이면 결과 코드 (WDR/DSQ)
+                            country:
+                              type: string
+                              description: 국가(NOC) 코드
+                            name:
+                              type: string
+                              description: 선수 이름 (팀전은 팀명, scoreboard 표기 규칙)
+                            finalScore:
+                              type: number
+                              format: double
+                              nullable: true
+                              description: 최종 점수 (1·2차 평균의 평균). WDR/DSQ는 0.000
+                            resultDecision:
+                              type: string
+                              nullable: true
+                              description: 경기 결과 판정 (PASS·FAIL·WDR·DSQ 등)
+                      startingOrderList:
+                        type: array
+                        description: 대기 순서 리스트 (완료되지 않은 경기 — 코트 → sort_no 순)
+                        items:
+                          type: object
+                          properties:
+                            competitionMatchPsSeq:
+                              type: integer
+                              description: 경기 시퀀스
+                            matchNumber:
+                              type: integer
+                              description: 매치 번호
+                            mat:
+                              type: integer
+                              description: 코트 번호
+                            matchStatus:
+                              type: string
+                              enum: [ONGOING, WAITING]
+                              description: 경기 상태 (ONGOING = Running, WAITING = Waiting)
+                            country:
+                              type: string
+                              description: 국가(NOC) 코드
+                            name:
+                              type: string
+                              description: 선수 이름 (팀전은 팀명, scoreboard 표기 규칙)
+                  error:
+                    type: string
+                    nullable: true
+              examples:
+                successResponse:
+                  summary: 성공응답
+                  value:
+                    {
+                      "success": true,
+                      "data": {
+                        "competitionName": "단체 코트다름 0828",
+                        "competitionTimezone": "America/Bahia",
+                        "hostLogoUrl": null,
+                        "competitionLogUrl": null,
+                        "competitionLocation": "마곡역",
+                        "competitionLocalYn": "W",
+                        "selectedFilter": {
+                          "divisionCode": "WT_RECOGNIZED_POOMSAE",
+                          "divisionNameKo": "WT 공인품새룰",
+                          "divisionNameEn": "WT Recognized Poomsae",
+                          "departmentCode": "CADET",
+                          "departmentNameKo": "유소년부",
+                          "departmentNameEn": "Cadet",
+                          "divisionCategoryCode": "INDIVIDUAL_MALE",
+                          "divisionCategoryNameKo": "남자개인",
+                          "divisionCategoryNameEn": "Individual male",
+                          "phase": "PRE",
+                          "cutoffGroup": "A"
+                        },
+                        "remainCompetitorCount": 3,
+                        "totalCompetitorCount": 5,
+                        "currentRankList": [
+                          {
+                            "competitionMatchPsSeq": 45956,
+                            "ranking": "1",
+                            "country": "GER",
+                            "name": "Choi Nina",
+                            "finalScore": 9.233,
+                            "resultDecision": "PASS"
+                          },
+                          {
+                            "competitionMatchPsSeq": 45957,
+                            "ranking": "WDR",
+                            "country": "KOR",
+                            "name": "Clark Nina",
+                            "finalScore": 0.000,
+                            "resultDecision": "WDR"
+                          }
+                        ],
+                        "startingOrderList": [
+                          {
+                            "competitionMatchPsSeq": 45958,
+                            "matchNumber": 1003,
+                            "mat": 1,
+                            "matchStatus": "ONGOING",
+                            "country": "GER",
+                            "name": "Wang Jane"
+                          },
+                          {
+                            "competitionMatchPsSeq": 45959,
+                            "matchNumber": 1004,
+                            "mat": 1,
+                            "matchStatus": "WAITING",
+                            "country": "KOR",
+                            "name": "Kim Minsu"
+                          }
+                        ]
+                      },
+                      "error": null
+                    }
+                ITEM_NOT_FOUND:
+                  $ref: '../../components/examples.yaml#/ITEM_NOT_FOUND'
+                COMPETITION_MATCH_NOT_FOUND:
+                  $ref: '../../components/examples.yaml#/COMPETITION_MATCH_NOT_FOUND'
         '403':
           description: 권한 없음
           content:
