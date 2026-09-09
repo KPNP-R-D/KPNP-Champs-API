@@ -435,7 +435,7 @@
                         description: 현재 일차
                       competitionDayStatus:
                         type: string
-                        description: 현재 일차 상태 (START, END)
+                        description: 현재 일차 상태(START, END)
                   error:
                     type: string
                     nullable: true
