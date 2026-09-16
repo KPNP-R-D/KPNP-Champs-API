@@ -18,6 +18,7 @@
             type: string
             enum:
               - NONE
+              - PRE_READY
               - DRAW_POOMSAE
               - READY
               - FIRST_START

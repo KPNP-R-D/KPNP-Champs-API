@@ -835,4 +835,20 @@ ALREADY_SAVED_DATA:
       message: "이미 저장 된 데이터입니다."
       errorCode: "E765"
 
+INVALID_MANAGER_INVITATION:
+  value:
+    success: false
+    data: null
+    error:
+      message: "초대 대상 운영진 중 존재하지 않거나 탈퇴한 회원이 있습니다."
+      errorCode: "E767"
+
+WITHDRAWN_PARTICIPANT_STATUS_CHANGE_DENIED:
+  value:
+    success: false
+    data: null
+    error:
+      message: "탈퇴 유저는 상태변경이 불가합니다. 재참가를 원할 경우 신규 등록을 해주세요."
+      errorCode: "E768"
+
 

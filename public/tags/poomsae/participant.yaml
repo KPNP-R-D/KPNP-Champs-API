@@ -477,6 +477,8 @@
                     error: null
                 CONFIRM_PARTICIPANT_COMPETITION:
                   $ref: '../../components/examples.yaml#/CONFIRM_PARTICIPANT_COMPETITION'
+                WITHDRAWN_PARTICIPANT_STATUS_CHANGE_DENIED:
+                  $ref: '../../components/examples.yaml#/WITHDRAWN_PARTICIPANT_STATUS_CHANGE_DENIED'
         '403':
           description: Forbidden
           content:
@@ -543,6 +545,8 @@
                     error: null
                 CONFIRM_PARTICIPANT_COMPETITION:
                   $ref: '../../components/examples.yaml#/CONFIRM_PARTICIPANT_COMPETITION'
+                WITHDRAWN_PARTICIPANT_STATUS_CHANGE_DENIED:
+                  $ref: '../../components/examples.yaml#/WITHDRAWN_PARTICIPANT_STATUS_CHANGE_DENIED'
         '403':
           description: Forbidden
           content:

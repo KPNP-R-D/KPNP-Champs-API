@@ -72,6 +72,8 @@
                           memId: kpnp_press
                 ITEM_NOT_FOUND:
                   $ref: '../../components/examples.yaml#/ITEM_NOT_FOUND'
+                INVALID_MANAGER_INVITATION:
+                  $ref: '../../components/examples.yaml#/INVALID_MANAGER_INVITATION'
         403:
           description: Forbidden
           content:
@@ -200,6 +202,8 @@
                     error: null
                 ITEM_NOT_FOUND:
                   $ref: '../../components/examples.yaml#/ITEM_NOT_FOUND'
+                INVALID_MANAGER_INVITATION:
+                  $ref: '../../components/examples.yaml#/INVALID_MANAGER_INVITATION'
         403:
           description: Forbidden
           content:
