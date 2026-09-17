@@ -320,6 +320,8 @@ paths:
     $ref: './tags/poomsae/document/document.yaml#/paths/~1competitions~1{competitionSeq}~1documents~1sub-list~1{documentType}'
   /competitions/{competitionSeq}/documents/favorite/{documentType}:
     $ref: './tags/poomsae/document/document.yaml#/paths/~1competitions~1{competitionSeq}~1documents~1favorite~1{documentType}'
+  /competitions/{competitionSeq}/documents/draw-setting:
+    $ref: './tags/poomsae/document/document.yaml#/paths/~1competitions~1{competitionSeq}~1documents~1draw-setting'
   /competitions/{competitionSeq}/documents/detail/DRAW_SHEET_OR_START_LIST:
     $ref: './tags/poomsae/document/draw-sheet.yaml#/paths/~1competitions~1{competitionSeq}~1documents~1detail~1DRAW_SHEET_OR_START_LIST'
   /competitions/{competitionSeq}/documents/detail/CONTEST_RESULTS_OF_CUTOFF:

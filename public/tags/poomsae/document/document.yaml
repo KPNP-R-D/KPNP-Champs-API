@@ -468,4 +468,138 @@
                 IS_NOT_AUTHORIZED:
                   $ref: '../../../components/examples.yaml#/IS_NOT_AUTHORIZED'
 
-
+  /competitions/{competitionSeq}/documents/draw-setting:
+    get:
+      summary: 대진 문서 표시 설정 조회
+      description: 해당 대회의 대진(Draw Sheet) 문서에 적용되는 갭·폰트 사이즈·팀표기 설정을 조회한다. 최초 저장 전에는 기본값(gap 30, fontSize 15, isTeam false)을 내려준다.
+      tags:
+        - 문서
+      parameters:
+        - name: competitionSeq
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 대회의 고유 식별자
+      responses:
+        '200':
+          description: 대진 문서 표시 설정 조회 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      gap:
+                        type: integer
+                        example: 30
+                        description: '대진 사이 간격 (기본 30)'
+                      fontSize:
+                        type: integer
+                        example: 15
+                        description: '폰트 사이즈 (기본 15)'
+                      isTeam:
+                        type: boolean
+                        example: false
+                        description: '팀표기 여부 (기본 false)'
+                  error:
+                    type: string
+                    nullable: true
+                    example: null
+              examples:
+                successResponse:
+                  summary: 성공 응답
+                  value:
+                    {
+                      "success": true,
+                      "data": {
+                        "gap": 30,
+                        "fontSize": 15,
+                        "isTeam": false
+                      },
+                      "error": null
+                    }
+        '403':
+          description: 권한 없음
+          content:
+            application/json:
+              schema:
+                $ref: '../../../components/responses.yaml#/Error'
+              examples:
+                IS_NOT_AUTHORIZED:
+                  $ref: '../../../components/examples.yaml#/IS_NOT_AUTHORIZED'
+    put:
+      summary: 대진 문서 표시 설정 저장
+      description: 해당 대회의 모든 대진(Draw Sheet) 문서에 적용되는 갭·폰트 사이즈·팀표기 설정을 저장한다. 최초 저장은 생성, 이후는 수정으로 처리된다.
+      tags:
+        - 문서
+      parameters:
+        - name: competitionSeq
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 대회의 고유 식별자
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - gap
+                - fontSize
+                - isTeam
+              properties:
+                gap:
+                  type: integer
+                  minimum: 1
+                  example: 30
+                  description: '대진 사이 간격 (1 이상)'
+                fontSize:
+                  type: integer
+                  minimum: 1
+                  example: 15
+                  description: '폰트 사이즈 (1 이상)'
+                isTeam:
+                  type: boolean
+                  example: false
+                  description: '팀표기 여부'
+      responses:
+        '200':
+          description: 대진 문서 표시 설정 저장 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    nullable: true
+                  error:
+                    type: string
+                    nullable: true
+              examples:
+                success:
+                  summary: 성공 응답 예시
+                  value:
+                    success: true
+                    data: null
+                    error: null
+        '403':
+          description: 권한 없음
+          content:
+            application/json:
+              schema:
+                $ref: '../../../components/responses.yaml#/Error'
+              examples:
+                IS_NOT_AUTHORIZED:
+                  $ref: '../../../components/examples.yaml#/IS_NOT_AUTHORIZED'
