@@ -5338,6 +5338,66 @@
                 IS_NOT_AUTHORIZED:
                   $ref: '../../components/examples.yaml#/IS_NOT_AUTHORIZED'
 
+  /competitions/{competitionSeq}/operation/matches/style-existence:
+    get:
+      summary: 대회에 컷오프 / 토너먼트 경기 존재 여부 조회
+      description: 해당 대회의 경기(match_status가 CANCELLED가 아닌 것) 중 컷오프 경기와 토너먼트 경기가 각각 존재하는지 반환한다. 컷오프+토너먼트 대회는 두 값이 모두 true가 될 수 있다.
+      tags:
+        - 운영 - 경기
+      parameters:
+        - name: competitionSeq
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: 대회 고유 시퀀스
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    required:
+                      - hasCutoff
+                      - hasTournament
+                    properties:
+                      hasCutoff:
+                        type: boolean
+                        description: 컷오프 경기 존재 여부
+                      hasTournament:
+                        type: boolean
+                        description: 토너먼트 경기 존재 여부
+                  error:
+                    type: string
+                    nullable: true
+              examples:
+                successResponse:
+                  summary: 성공 응답 예시
+                  value:
+                    {
+                      "success": true,
+                      "data": {
+                        "hasCutoff": true,
+                        "hasTournament": false
+                      },
+                      "error": null
+                    }
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '../../components/responses.yaml#/Error'
+              examples:
+                IS_NOT_AUTHORIZED:
+                  $ref: '../../components/examples.yaml#/IS_NOT_AUTHORIZED'
+
   /competitions/{competitionSeq}/operation/matches/progress/{day}:
     get:
       summary: 운영 - 대회 진행 현황 조회
