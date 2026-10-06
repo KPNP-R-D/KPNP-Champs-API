@@ -834,6 +834,48 @@ ALREADY_SAVED_DATA:
     error:
       message: "이미 저장 된 데이터입니다."
       errorCode: "E765"
+SENT_SCORE_UPDATE_NOT_ALLOWED_MATCH_END:
+  value:
+    success: false
+    data: null
+    error:
+      message: "종료된 경기입니다. 완료 경기 화면에서 수정해 주세요."
+      errorCode: "E916"
+SCORE_CHANGED_BY_REFEREE:
+  value:
+    success: false
+    data: null
+    error:
+      message: "심판이 점수를 변경했습니다. 다시 조회한 뒤 수정해 주세요."
+      errorCode: "E917"
+SCORE_MISMATCH:
+  value:
+    success: false
+    data: null
+    error:
+      message: "채점 모달에서 변경한 점수와 SEND된 점수가 일치하지 않습니다."
+      errorCode: "E717"
+COMPETITOR_SIDE_TYPE_MISMATCH:
+  value:
+    success: false
+    data: null
+    error:
+      message: "선수의 번호와 경기 사이드 타입이 일치하지 않습니다."
+      errorCode: "E726"
+SCORE_UPDATE_NOT_ALLOWED_TOURNAMENT:
+  value:
+    success: false
+    data: null
+    error:
+      message: "토너먼트는 점수를 승패가 변경될 수준으로 수정할 수 없습니다."
+      errorCode: "E744"
+MATCH_RESULT_DRAW_CANNOT_DETERMINE_WINNER:
+  value:
+    success: false
+    data: null
+    error:
+      message: "무승부 상태에서는 승자를 결정할 수 없습니다."
+      errorCode: "E743"
 
 INVALID_MANAGER_INVITATION:
   value:

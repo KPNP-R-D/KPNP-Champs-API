@@ -283,6 +283,8 @@ paths:
     $ref: './tags/poomsae/score.yaml#/paths/~1competitions~1{competitionSeq}~1matches~1{matchSeq}~1scores~1send'
   /competitions/{competitionSeq}/matches/{matchSeq}/competitors/{competitorSeq}/scores:
     $ref: './tags/poomsae/score.yaml#/paths/~1competitions~1{competitionSeq}~1matches~1{matchSeq}~1competitors~1{competitorSeq}~1scores'
+  /competitions/{competitionSeq}/matches/{matchSeq}/competitors/{competitorSeq}/sent-scores:
+    $ref: './tags/poomsae/score.yaml#/paths/~1competitions~1{competitionSeq}~1matches~1{matchSeq}~1competitors~1{competitorSeq}~1sent-scores'
 
   # FOP
   /competitions/{competitionSeq}/fop/status/main/{status}:

@@ -2902,13 +2902,13 @@
             type: integer
           description: 대회 seq
         - in: path
-          name: competitionMatchPsSeq
+          name: matchSeq
           required: true
           schema:
             type: integer
           description: 대회 경기 seq
         - in: path
-          name: matchCompetitorDetailSeq
+          name: competitorSeq
           required: true
           schema:
             type: integer
@@ -3033,6 +3033,7 @@
                             example: AWAY
                           deductionCounts:
                             type: array
+                            description: 전송 기준 감점 횟수(Y 인 적용 − Y 인 취소 · 전송과 운영 수정이 반영한 몫) — 완료 모달의 편집 초깃값이자 PUT …/scores 의 비교 기준. 심판의 미전송 감점은 들지 않는다(진행 중 모달 GET …/sent-scores 와 같은 계산)
                             items:
                               type: object
                               properties:
@@ -3042,12 +3043,17 @@
                                 count:
                                   type: integer
                                   example: 5
+                          hasUnsentChanges:
+                            type: boolean
+                            example: true
+                            description: 이 심판·순서·선수 쪽에 전송되지 않은 변경(채점·감점 로그)이 있는가
                           totalScore:
                             type: number
                             example: 5.700
                           deductionScore:
                             type: number
                             example: 3.300
+                            description: DETAIL 기준 감점 점수 — 공인 = 정확도 DETAIL · 자유 = SCORE_DEDUCTION DETAIL(행이 없으면 유형 기본값). LOG 최신값이 아니다
                           criteriaTotalScores:
                             type: array
                             items:
@@ -3139,7 +3145,7 @@
                                               type: string
                                               enum: [ JUMPING_SIDE_KICK, MULTIPLE_KICKS_IN_A_JUMP, GRADIENT_OF_SPINS_IN_A_SPIN_KICK, KYORUGI_STYLE_CONSECUTIVE_KICKS, ACROBATIC_KICKING_TECHNIQUE ]
                                               description: 상세 채점 항목 서브 타입
-                                            poomsaeScoringType:
+                                            scoringType:
                                               type: object
                                               required:
                                                 - nameEn
@@ -3204,6 +3210,7 @@
                             count: 5
                           - deltaType: 0.3
                             count: 0
+                        hasUnsentChanges: true
                         totalScore: 5.700
                         deductionScore: 3.300
                         criteriaTotalScores:
@@ -3261,10 +3268,10 @@
                                 score: 0.900
                                 criteriaDetailSubTypes: [ ]
                     error: null
-                IS_NOT_AUTHORIZED:
-                  $ref: '../../components/examples.yaml#/IS_NOT_AUTHORIZED'
                 SCORING_NOT_COMPLETED:
                   $ref: '../../components/examples.yaml#/SCORING_NOT_COMPLETED'
+                MATCH_COMPETITOR_DETAIL_NOT_FOUND:
+                  $ref: '../../components/examples.yaml#/MATCH_COMPETITOR_DETAIL_NOT_FOUND'
         403:
           description: Forbidden
           content:
@@ -3286,37 +3293,17 @@
             type: integer
           description: 대회 seq
         - in: path
-          name: competitionMatchPsSeq
+          name: matchSeq
           required: true
           schema:
             type: integer
           description: 대회 경기 seq
         - in: path
-          name: matchCompetitorDetailSeq
+          name: competitorSeq
           required: true
           schema:
             type: integer
           description: 경기 선수 상세 seq
-        - in: query
-          name: poomsaeSequenceType
-          required: true
-          schema:
-            type: string
-            enum: [P1, P2]
-          description: 품새 시퀀스 타입
-        - in: query
-          name: matchRefereeMappingSeq
-          required: true
-          schema:
-            type: integer
-          description: 매핑된 심판 그룹 seq
-        - in: query
-          name: matchSideType
-          required: true
-          schema:
-            type: string
-            enum: [HOME, AWAY, CUTOFF]
-          description: 경기 사이드 타입
       requestBody:
         required: true
         content:
@@ -3476,7 +3463,7 @@
                       criteriaDetailSubTypes: [ ]
       responses:
         '200':
-          description: 점수 상세 조회 성공
+          description: 점수 수정 성공
           content:
             application/json:
               schema:
@@ -3574,6 +3561,7 @@
                             example: AWAY
                           deductionCounts:
                             type: array
+                            description: 전송 기준 감점 횟수(Y 인 적용 − Y 인 취소 · 전송과 운영 수정이 반영한 몫) — 완료 모달의 편집 초깃값이자 PUT …/scores 의 비교 기준. 심판의 미전송 감점은 들지 않는다(진행 중 모달 GET …/sent-scores 와 같은 계산)
                             items:
                               type: object
                               properties:
@@ -3583,12 +3571,17 @@
                                 count:
                                   type: integer
                                   example: 5
+                          hasUnsentChanges:
+                            type: boolean
+                            example: true
+                            description: 이 심판·순서·선수 쪽에 전송되지 않은 변경(채점·감점 로그)이 있는가
                           totalScore:
                             type: number
                             example: 5.700
                           deductionScore:
                             type: number
                             example: 3.300
+                            description: DETAIL 기준 감점 점수 — 공인 = 정확도 DETAIL · 자유 = SCORE_DEDUCTION DETAIL(행이 없으면 유형 기본값). LOG 최신값이 아니다
                           criteriaTotalScores:
                             type: array
                             items:
@@ -3680,7 +3673,422 @@
                                               type: string
                                               enum: [ JUMPING_SIDE_KICK, MULTIPLE_KICKS_IN_A_JUMP, GRADIENT_OF_SPINS_IN_A_SPIN_KICK, KYORUGI_STYLE_CONSECUTIVE_KICKS, ACROBATIC_KICKING_TECHNIQUE ]
                                               description: 상세 채점 항목 서브 타입
-                                            poomsaeScoringType:
+                                            scoringType:
+                                              type: object
+                                              required:
+                                                - nameEn
+                                                - nameKo
+                                                - sortNo
+                                              properties:
+                                                nameEn:
+                                                  type: string
+                                                  example: "Jumping side Kick"
+                                                  description: 상세 평가 하위 기준명 (영문)
+                                                nameKo:
+                                                  type: string
+                                                  example: "뛰어 옆차기"
+                                                  description: 상세 평가 하위 기준명 (한글)
+                                                sortNo:
+                                                  type: integer
+                                                  example: 1
+                                                  description: 정렬 번호
+                                            score:
+                                              type: number
+                                              format: float
+                                              example: 0.3
+                                              description: 점수
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+              examples:
+                default:
+                  summary: 점수 수정 예시
+                  value:
+                    success: true
+                    data:
+                      match:
+                        phase: "R64"
+                        poomsaeTypeEn: "Taegeuk 7 Jang"
+                        poomsaeTypeKo: "태극 7장"
+                        poomsaeStyleType: "RECOGNIZED_POOMSAE"
+                      competitor:
+                        matchCompetitorDetailSeq: 5298
+                        matchSideType: "AWAY"
+                      referee:
+                        refereeSeq: 6814
+                        matchRefereeMappingSeq: 915
+                        refereeTypeNameEn: "Judge 2"
+                        refereeTypeNameKo: "심판 2"
+                        noc: "TUN"
+                        country: "Tunisia"
+                        givenName: "Amal"
+                        familyName: "Grati"
+                        refereeId: "champs6"
+                        email: "amal@gmail.com"
+                      scores:
+                        competitionSeq: 2131
+                        competitionMatchPsSeq: 20024
+                        matchCompetitorDetailSeq: 5298
+                        matchRefereeMappingSeq: 915
+                        poomsaeSequenceType: "P1"
+                        matchSideType: "AWAY"
+                        deductionCounts:
+                          - deltaType: 0.100
+                            count: 5
+                          - deltaType: 0.3
+                            count: 0
+                        hasUnsentChanges: true
+                        totalScore: 5.700
+                        deductionScore: 3.300
+                        criteriaTotalScores:
+                          - criteriaType: "ACCURACY"
+                            scoringType:
+                              nameEn: "accuracy"
+                              nameKo: "정확도"
+                              sortNo: 1
+                            totalScore: 3.300
+                          - criteriaType: "PRESENTATION"
+                            scoringType:
+                              nameEn: "presentation"
+                              nameKo: "표현력"
+                              sortNo: 2
+                            totalScore: 2.400
+                        criteriaTypes:
+                          - matchScoreSeq: 944
+                            criteriaType: "ACCURACY"
+                            scoringType:
+                              nameEn: "accuracy"
+                              nameKo: "정확도"
+                              sortNo: 1
+                            score: 3.300
+                            criteriaDetailTypes: [ ]
+                          - matchScoreSeq: null
+                            criteriaType: "PRESENTATION"
+                            scoringType:
+                              nameEn: "presentation"
+                              nameKo: "표현력"
+                              sortNo: 2
+                            score: null
+                            criteriaDetailTypes:
+                              - matchScoreSeq: 945
+                                criteriaDetailType: "SPEED_AND_POWER"
+                                scoringType:
+                                  nameEn: "Speed and power"
+                                  nameKo: "속도와 힘"
+                                  sortNo: 1
+                                score: 0.700
+                                criteriaDetailSubTypes: [ ]
+                              - matchScoreSeq: 946
+                                criteriaDetailType: "RHYTHM_AND_TEMPO"
+                                scoringType:
+                                  nameEn: "Rhythm & tempo"
+                                  nameKo: "강유-완급-리듬"
+                                  sortNo: 2
+                                score: 0.800
+                                criteriaDetailSubTypes: [ ]
+                              - matchScoreSeq: 947
+                                criteriaDetailType: "EXPRESSION_OF_ENERGY"
+                                scoringType:
+                                  nameEn: "Expression of energy"
+                                  nameKo: "기의 표현"
+                                  sortNo: 3
+                                score: 0.900
+                                criteriaDetailSubTypes: [ ]
+                    error: null
+                SCORING_NOT_COMPLETED:
+                  $ref: '../../components/examples.yaml#/SCORING_NOT_COMPLETED'
+                SCORE_UPDATE_NOT_ALLOWED_AFTER_NEXT_ROUND_STARTED:
+                  $ref: '../../components/examples.yaml#/SCORE_UPDATE_NOT_ALLOWED_AFTER_NEXT_ROUND_STARTED'
+                MATCH_IS_NOT_END:
+                  $ref: '../../components/examples.yaml#/MATCH_IS_NOT_END'
+                SCORE_CHANGED_BY_REFEREE:
+                  $ref: '../../components/examples.yaml#/SCORE_CHANGED_BY_REFEREE'
+                SCORE_MISMATCH:
+                  $ref: '../../components/examples.yaml#/SCORE_MISMATCH'
+                COMPETITOR_SIDE_TYPE_MISMATCH:
+                  $ref: '../../components/examples.yaml#/COMPETITOR_SIDE_TYPE_MISMATCH'
+                MATCH_COMPETITOR_DETAIL_NOT_FOUND:
+                  $ref: '../../components/examples.yaml#/MATCH_COMPETITOR_DETAIL_NOT_FOUND'
+                OUT_OF_SCORE_SCALE:
+                  $ref: '../../components/examples.yaml#/OUT_OF_SCORE_SCALE'
+                REQUIRED_TYPE_NOT_SCORED:
+                  $ref: '../../components/examples.yaml#/REQUIRED_TYPE_NOT_SCORED'
+                SCORE_UPDATE_NOT_ALLOWED_TOURNAMENT:
+                  $ref: '../../components/examples.yaml#/SCORE_UPDATE_NOT_ALLOWED_TOURNAMENT'
+                MATCH_RESULT_DRAW_CANNOT_DETERMINE_WINNER:
+                  $ref: '../../components/examples.yaml#/MATCH_RESULT_DRAW_CANNOT_DETERMINE_WINNER'
+                COMPETITION_MATCH_NOT_FOUND:
+                  $ref: '../../components/examples.yaml#/COMPETITION_MATCH_NOT_FOUND'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '../../components/responses.yaml#/Error'
+              examples:
+                IS_NOT_AUTHORIZED:
+                  $ref: '../../components/examples.yaml#/IS_NOT_AUTHORIZED'
+
+
+
+  /competitions/{competitionSeq}/matches/{matchSeq}/competitors/{competitorSeq}/sent-scores:
+    get:
+      summary: 심판별 전송 기준 채점 점수 조회 (진행 중 모달)
+      tags:
+        - 채점
+      parameters:
+        - in: path
+          name: competitionSeq
+          required: true
+          schema:
+            type: integer
+          description: 대회 seq
+        - in: path
+          name: matchSeq
+          required: true
+          schema:
+            type: integer
+          description: 대회 경기 seq
+        - in: path
+          name: competitorSeq
+          required: true
+          schema:
+            type: integer
+          description: 경기 선수 상세 seq
+        - in: query
+          name: poomsaeSequenceType
+          required: true
+          schema:
+            type: string
+            enum: [P1, P2]
+          description: 품새 시퀀스 타입
+        - in: query
+          name: matchRefereeMappingSeq
+          required: true
+          schema:
+            type: integer
+          description: 매핑된 심판 그룹 seq
+        - in: query
+          name: poomsaeMatchSideType
+          required: true
+          schema:
+            type: string
+            enum: [HOME, AWAY, CUTOFF]
+          description: 경기 사이드 타입
+      responses:
+        '200':
+          description: 전송 기준 점수 상세 조회 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                    description: 요청 성공 여부
+                  data:
+                    type: object
+                    properties:
+                      match:
+                        type: object
+                        properties:
+                          phase:
+                            type: string
+                            example: R64
+                            description: 라운드 단계
+                          poomsaeTypeEn:
+                            type: string
+                            example: Taegeuk 7 Jang
+                            description: 품새명(영문)
+                          poomsaeTypeKo:
+                            type: string
+                            example: 태극 7장
+                            description: 품새명(한글)
+                          poomsaeStyleType:
+                            type: string
+                            enum: [RECOGNIZED_POOMSAE, FREESTYLE]
+                            example: RECOGNIZED_POOMSAE
+                            description: 품새 스타일 타입
+                      competitor:
+                        type: object
+                        properties:
+                          matchCompetitorDetailSeq:
+                            type: integer
+                            example: 5298
+                          matchSideType:
+                            type: string
+                            example: AWAY
+                      referee:
+                        type: object
+                        properties:
+                          refereeSeq:
+                            type: integer
+                            example: 6814
+                          matchRefereeMappingSeq:
+                            type: integer
+                            example: 915
+                          refereeTypeNameEn:
+                            type: string
+                            example: Judge 2
+                          refereeTypeNameKo:
+                            type: string
+                            example: 심판 2
+                          noc:
+                            type: string
+                            example: TUN
+                          country:
+                            type: string
+                            example: Tunisia
+                          givenName:
+                            type: string
+                            example: Amal
+                          familyName:
+                            type: string
+                            example: Grati
+                          refereeId:
+                            type: string
+                            example: champs6
+                          email:
+                            type: string
+                            example: amal@gmail.com
+                      scores:
+                        type: object
+                        properties:
+                          competitionSeq:
+                            type: integer
+                            example: 2131
+                          competitionMatchPsSeq:
+                            type: integer
+                            example: 20024
+                          matchCompetitorDetailSeq:
+                            type: integer
+                            example: 5298
+                          matchRefereeMappingSeq:
+                            type: integer
+                            example: 915
+                          poomsaeSequenceType:
+                            type: string
+                            example: P1
+                          matchSideType:
+                            type: string
+                            example: AWAY
+                          deductionCounts:
+                            type: array
+                            description: 전송 기준 감점 횟수(Y 인 적용 − Y 인 취소 · 전송과 운영 수정이 반영한 몫) — 진행 중 모달의 편집 초깃값이자 PUT …/sent-scores 의 비교 기준. 심판의 미전송 감점은 들지 않는다
+                            items:
+                              type: object
+                              properties:
+                                deltaType:
+                                  type: number
+                                  example: 0.100
+                                count:
+                                  type: integer
+                                  example: 5
+                          hasUnsentChanges:
+                            type: boolean
+                            example: true
+                            description: 이 심판·순서·선수 쪽에 전송되지 않은 변경(채점·감점 로그)이 있는가
+                          totalScore:
+                            type: number
+                            example: 5.700
+                          deductionScore:
+                            type: number
+                            example: 3.300
+                            description: DETAIL 기준 감점 점수 — 공인 = 정확도 DETAIL · 자유 = SCORE_DEDUCTION DETAIL(행이 없으면 유형 기본값). LOG 최신값이 아니다
+                          criteriaTotalScores:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                criteriaType:
+                                  type: string
+                                  example: ACCURACY
+                                scoringType:
+                                  type: object
+                                  properties:
+                                    nameEn:
+                                      type: string
+                                      example: accuracy
+                                    nameKo:
+                                      type: string
+                                      example: 정확도
+                                    sortNo:
+                                      type: integer
+                                      example: 1
+                                totalScore:
+                                  type: number
+                                  example: 3.300
+                          criteriaTypes:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                matchScoreSeq:
+                                  type: integer
+                                  nullable: true
+                                  example: 944
+                                criteriaType:
+                                  type: string
+                                  example: ACCURACY
+                                scoringType:
+                                  type: object
+                                  properties:
+                                    nameEn:
+                                      type: string
+                                      example: accuracy
+                                    nameKo:
+                                      type: string
+                                      example: 정확도
+                                    sortNo:
+                                      type: integer
+                                      example: 1
+                                score:
+                                  type: number
+                                  nullable: true
+                                  example: 3.300
+                                criteriaDetailTypes:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      matchScoreSeq:
+                                        type: integer
+                                        nullable: true
+                                        example: 945
+                                      criteriaDetailType:
+                                        type: string
+                                        example: SPEED_AND_POWER
+                                      scoringType:
+                                        type: object
+                                        properties:
+                                          nameEn:
+                                            type: string
+                                            example: Speed and power
+                                          nameKo:
+                                            type: string
+                                            example: 속도와 힘
+                                          sortNo:
+                                            type: integer
+                                            example: 1
+                                      score:
+                                        type: number
+                                        example: 0.700
+                                      criteriaDetailSubTypes:
+                                        type: array
+                                        items:
+                                          type: object
+                                          properties:
+                                            matchScoreSeq:
+                                              type: integer
+                                              nullable: true
+                                              example: 949
+                                            criteriaSubType:
+                                              type: string
+                                              enum: [ JUMPING_SIDE_KICK, MULTIPLE_KICKS_IN_A_JUMP, GRADIENT_OF_SPINS_IN_A_SPIN_KICK, KYORUGI_STYLE_CONSECUTIVE_KICKS, ACROBATIC_KICKING_TECHNIQUE ]
+                                              description: 상세 채점 항목 서브 타입
+                                            scoringType:
                                               type: object
                                               required:
                                                 - nameEn
@@ -3745,6 +4153,7 @@
                             count: 5
                           - deltaType: 0.3
                             count: 0
+                        hasUnsentChanges: true
                         totalScore: 5.700
                         deductionScore: 3.300
                         criteriaTotalScores:
@@ -3802,12 +4211,552 @@
                                 score: 0.900
                                 criteriaDetailSubTypes: [ ]
                     error: null
-                IS_NOT_AUTHORIZED:
-                  $ref: '../../components/examples.yaml#/IS_NOT_AUTHORIZED'
                 SCORING_NOT_COMPLETED:
                   $ref: '../../components/examples.yaml#/SCORING_NOT_COMPLETED'
-                SCORE_UPDATE_NOT_ALLOWED_AFTER_NEXT_ROUND_STARTED:
-                  $ref: '../../components/examples.yaml#/SCORE_UPDATE_NOT_ALLOWED_AFTER_NEXT_ROUND_STARTED'
+                MATCH_COMPETITOR_DETAIL_NOT_FOUND:
+                  $ref: '../../components/examples.yaml#/MATCH_COMPETITOR_DETAIL_NOT_FOUND'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '../../components/responses.yaml#/Error'
+              examples:
+                IS_NOT_AUTHORIZED:
+                  $ref: '../../components/examples.yaml#/IS_NOT_AUTHORIZED'
+    put:
+      summary: 심판별 전송 기준 채점 점수 수정 (진행 중 모달)
+      tags:
+        - 채점
+      parameters:
+        - in: path
+          name: competitionSeq
+          required: true
+          schema:
+            type: integer
+          description: 대회 seq
+        - in: path
+          name: matchSeq
+          required: true
+          schema:
+            type: integer
+          description: 대회 경기 seq
+        - in: path
+          name: competitorSeq
+          required: true
+          schema:
+            type: integer
+          description: 경기 선수 상세 seq
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                competitionSeq:
+                  type: integer
+                  example: 2131
+                  description: 대회 SEQ
+                competitionMatchPsSeq:
+                  type: integer
+                  example: 20024
+                  description: 경기 SEQ
+                matchCompetitorDetailSeq:
+                  type: integer
+                  example: 5298
+                  description: 경기 참가자 상세 SEQ
+                matchRefereeMappingSeq:
+                  type: integer
+                  example: 915
+                  description: 심판 매핑 SEQ
+                poomsaeSequenceType:
+                  type: string
+                  example: P1
+                  description: 품새 시퀀스 타입
+                matchSideType:
+                  type: string
+                  example: AWAY
+                  description: 품새 경기 사이드
+                deductionCounts:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      deltaType:
+                        type: number
+                        example: 0.100
+                        description: 감점 단위
+                      count:
+                        type: integer
+                        example: 5
+                        description: 감점 횟수
+                criteriaTypes:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      matchScoreSeq:
+                        type: integer
+                        nullable: true
+                        example: 944
+                      criteriaType:
+                        type: string
+                        example: ACCURACY
+                      scoringType:
+                        type: object
+                        properties:
+                          nameEn:
+                            type: string
+                            example: accuracy
+                          nameKo:
+                            type: string
+                            example: 정확도
+                          sortNo:
+                            type: integer
+                            example: 1
+                      score:
+                        type: number
+                        nullable: true
+                        example: 3.300
+                      criteriaDetailTypes:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            matchScoreSeq:
+                              type: integer
+                              nullable: true
+                              example: 945
+                            criteriaDetailType:
+                              type: string
+                              example: SPEED_AND_POWER
+                            scoringType:
+                              type: object
+                              properties:
+                                nameEn:
+                                  type: string
+                                  example: Speed and power
+                                nameKo:
+                                  type: string
+                                  example: 속도와 힘
+                                sortNo:
+                                  type: integer
+                                  example: 1
+                            score:
+                              type: number
+                              example: 0.700
+                            criteriaDetailSubTypes:
+                              type: array
+                              items:
+                                type: object
+                              nullable: true
+            example:
+              competitionSeq: 2131
+              competitionMatchPsSeq: 20024
+              matchCompetitorDetailSeq: 5298
+              matchRefereeMappingSeq: 915
+              poomsaeSequenceType: P1
+              matchSideType: AWAY
+              deductionCounts:
+                - deltaType: 0.100
+                  count: 5
+                - deltaType: 0.300
+                  count: 0
+              criteriaTypes:
+                - matchScoreSeq: 944
+                  criteriaType: ACCURACY
+                  scoringType:
+                    nameEn: accuracy
+                    nameKo: "정확도"
+                    sortNo: 1
+                  score: 3.300
+                  criteriaDetailTypes: [ ]
+                - matchScoreSeq: null
+                  criteriaType: PRESENTATION
+                  scoringType:
+                    nameEn: presentation
+                    nameKo: "표현력"
+                    sortNo: 2
+                  score: null
+                  criteriaDetailTypes:
+                    - matchScoreSeq: 945
+                      criteriaDetailType: SPEED_AND_POWER
+                      scoringType:
+                        nameEn: Speed and power
+                        nameKo: "속도와 힘"
+                        sortNo: 1
+                      score: 0.700
+                      criteriaDetailSubTypes: [ ]
+                    - matchScoreSeq: 946
+                      criteriaDetailType: RHYTHM_AND_TEMPO
+                      scoringType:
+                        nameEn: Rhythm & tempo
+                        nameKo: "강유-완급-리듬"
+                        sortNo: 2
+                      score: 0.800
+                      criteriaDetailSubTypes: [ ]
+                    - matchScoreSeq: 947
+                      criteriaDetailType: EXPRESSION_OF_ENERGY
+                      scoringType:
+                        nameEn: Expression of energy
+                        nameKo: "기의 표현"
+                        sortNo: 3
+                      score: 0.900
+                      criteriaDetailSubTypes: [ ]
+      responses:
+        '200':
+          description: 전송 기준 점수 수정 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                    description: 요청 성공 여부
+                  data:
+                    type: object
+                    properties:
+                      match:
+                        type: object
+                        properties:
+                          phase:
+                            type: string
+                            example: R64
+                            description: 라운드 단계
+                          poomsaeTypeEn:
+                            type: string
+                            example: Taegeuk 7 Jang
+                            description: 품새명(영문)
+                          poomsaeTypeKo:
+                            type: string
+                            example: 태극 7장
+                            description: 품새명(한글)
+                          poomsaeStyleType:
+                            type: string
+                            enum: [RECOGNIZED_POOMSAE, FREESTYLE]
+                            example: RECOGNIZED_POOMSAE
+                            description: 품새 스타일 타입
+                      competitor:
+                        type: object
+                        properties:
+                          matchCompetitorDetailSeq:
+                            type: integer
+                            example: 5298
+                          matchSideType:
+                            type: string
+                            example: AWAY
+                      referee:
+                        type: object
+                        properties:
+                          refereeSeq:
+                            type: integer
+                            example: 6814
+                          matchRefereeMappingSeq:
+                            type: integer
+                            example: 915
+                          refereeTypeNameEn:
+                            type: string
+                            example: Judge 2
+                          refereeTypeNameKo:
+                            type: string
+                            example: 심판 2
+                          noc:
+                            type: string
+                            example: TUN
+                          country:
+                            type: string
+                            example: Tunisia
+                          givenName:
+                            type: string
+                            example: Amal
+                          familyName:
+                            type: string
+                            example: Grati
+                          refereeId:
+                            type: string
+                            example: champs6
+                          email:
+                            type: string
+                            example: amal@gmail.com
+                      scores:
+                        type: object
+                        properties:
+                          competitionSeq:
+                            type: integer
+                            example: 2131
+                          competitionMatchPsSeq:
+                            type: integer
+                            example: 20024
+                          matchCompetitorDetailSeq:
+                            type: integer
+                            example: 5298
+                          matchRefereeMappingSeq:
+                            type: integer
+                            example: 915
+                          poomsaeSequenceType:
+                            type: string
+                            example: P1
+                          matchSideType:
+                            type: string
+                            example: AWAY
+                          deductionCounts:
+                            type: array
+                            description: 전송 기준 감점 횟수(Y 인 적용 − Y 인 취소 · 전송과 운영 수정이 반영한 몫) — 진행 중 모달의 편집 초깃값이자 PUT …/sent-scores 의 비교 기준. 심판의 미전송 감점은 들지 않는다
+                            items:
+                              type: object
+                              properties:
+                                deltaType:
+                                  type: number
+                                  example: 0.100
+                                count:
+                                  type: integer
+                                  example: 5
+                          hasUnsentChanges:
+                            type: boolean
+                            example: true
+                            description: 이 심판·순서·선수 쪽에 전송되지 않은 변경(채점·감점 로그)이 있는가
+                          totalScore:
+                            type: number
+                            example: 5.700
+                          deductionScore:
+                            type: number
+                            example: 3.300
+                            description: DETAIL 기준 감점 점수 — 공인 = 정확도 DETAIL · 자유 = SCORE_DEDUCTION DETAIL(행이 없으면 유형 기본값). LOG 최신값이 아니다
+                          criteriaTotalScores:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                criteriaType:
+                                  type: string
+                                  example: ACCURACY
+                                scoringType:
+                                  type: object
+                                  properties:
+                                    nameEn:
+                                      type: string
+                                      example: accuracy
+                                    nameKo:
+                                      type: string
+                                      example: 정확도
+                                    sortNo:
+                                      type: integer
+                                      example: 1
+                                totalScore:
+                                  type: number
+                                  example: 3.300
+                          criteriaTypes:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                matchScoreSeq:
+                                  type: integer
+                                  nullable: true
+                                  example: 944
+                                criteriaType:
+                                  type: string
+                                  example: ACCURACY
+                                scoringType:
+                                  type: object
+                                  properties:
+                                    nameEn:
+                                      type: string
+                                      example: accuracy
+                                    nameKo:
+                                      type: string
+                                      example: 정확도
+                                    sortNo:
+                                      type: integer
+                                      example: 1
+                                score:
+                                  type: number
+                                  nullable: true
+                                  example: 3.300
+                                criteriaDetailTypes:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      matchScoreSeq:
+                                        type: integer
+                                        nullable: true
+                                        example: 945
+                                      criteriaDetailType:
+                                        type: string
+                                        example: SPEED_AND_POWER
+                                      scoringType:
+                                        type: object
+                                        properties:
+                                          nameEn:
+                                            type: string
+                                            example: Speed and power
+                                          nameKo:
+                                            type: string
+                                            example: 속도와 힘
+                                          sortNo:
+                                            type: integer
+                                            example: 1
+                                      score:
+                                        type: number
+                                        example: 0.700
+                                      criteriaDetailSubTypes:
+                                        type: array
+                                        items:
+                                          type: object
+                                          properties:
+                                            matchScoreSeq:
+                                              type: integer
+                                              nullable: true
+                                              example: 949
+                                            criteriaSubType:
+                                              type: string
+                                              enum: [ JUMPING_SIDE_KICK, MULTIPLE_KICKS_IN_A_JUMP, GRADIENT_OF_SPINS_IN_A_SPIN_KICK, KYORUGI_STYLE_CONSECUTIVE_KICKS, ACROBATIC_KICKING_TECHNIQUE ]
+                                              description: 상세 채점 항목 서브 타입
+                                            scoringType:
+                                              type: object
+                                              required:
+                                                - nameEn
+                                                - nameKo
+                                                - sortNo
+                                              properties:
+                                                nameEn:
+                                                  type: string
+                                                  example: "Jumping side Kick"
+                                                  description: 상세 평가 하위 기준명 (영문)
+                                                nameKo:
+                                                  type: string
+                                                  example: "뛰어 옆차기"
+                                                  description: 상세 평가 하위 기준명 (한글)
+                                                sortNo:
+                                                  type: integer
+                                                  example: 1
+                                                  description: 정렬 번호
+                                            score:
+                                              type: number
+                                              format: float
+                                              example: 0.3
+                                              description: 점수
+                  error:
+                    type: object
+                    nullable: true
+                    example: null
+              examples:
+                default:
+                  summary: 점수 수정 예시
+                  value:
+                    success: true
+                    data:
+                      match:
+                        phase: "R64"
+                        poomsaeTypeEn: "Taegeuk 7 Jang"
+                        poomsaeTypeKo: "태극 7장"
+                        poomsaeStyleType: "RECOGNIZED_POOMSAE"
+                      competitor:
+                        matchCompetitorDetailSeq: 5298
+                        matchSideType: "AWAY"
+                      referee:
+                        refereeSeq: 6814
+                        matchRefereeMappingSeq: 915
+                        refereeTypeNameEn: "Judge 2"
+                        refereeTypeNameKo: "심판 2"
+                        noc: "TUN"
+                        country: "Tunisia"
+                        givenName: "Amal"
+                        familyName: "Grati"
+                        refereeId: "champs6"
+                        email: "amal@gmail.com"
+                      scores:
+                        competitionSeq: 2131
+                        competitionMatchPsSeq: 20024
+                        matchCompetitorDetailSeq: 5298
+                        matchRefereeMappingSeq: 915
+                        poomsaeSequenceType: "P1"
+                        matchSideType: "AWAY"
+                        deductionCounts:
+                          - deltaType: 0.100
+                            count: 5
+                          - deltaType: 0.3
+                            count: 0
+                        hasUnsentChanges: true
+                        totalScore: 5.700
+                        deductionScore: 3.300
+                        criteriaTotalScores:
+                          - criteriaType: "ACCURACY"
+                            scoringType:
+                              nameEn: "accuracy"
+                              nameKo: "정확도"
+                              sortNo: 1
+                            totalScore: 3.300
+                          - criteriaType: "PRESENTATION"
+                            scoringType:
+                              nameEn: "presentation"
+                              nameKo: "표현력"
+                              sortNo: 2
+                            totalScore: 2.400
+                        criteriaTypes:
+                          - matchScoreSeq: 944
+                            criteriaType: "ACCURACY"
+                            scoringType:
+                              nameEn: "accuracy"
+                              nameKo: "정확도"
+                              sortNo: 1
+                            score: 3.300
+                            criteriaDetailTypes: [ ]
+                          - matchScoreSeq: null
+                            criteriaType: "PRESENTATION"
+                            scoringType:
+                              nameEn: "presentation"
+                              nameKo: "표현력"
+                              sortNo: 2
+                            score: null
+                            criteriaDetailTypes:
+                              - matchScoreSeq: 945
+                                criteriaDetailType: "SPEED_AND_POWER"
+                                scoringType:
+                                  nameEn: "Speed and power"
+                                  nameKo: "속도와 힘"
+                                  sortNo: 1
+                                score: 0.700
+                                criteriaDetailSubTypes: [ ]
+                              - matchScoreSeq: 946
+                                criteriaDetailType: "RHYTHM_AND_TEMPO"
+                                scoringType:
+                                  nameEn: "Rhythm & tempo"
+                                  nameKo: "강유-완급-리듬"
+                                  sortNo: 2
+                                score: 0.800
+                                criteriaDetailSubTypes: [ ]
+                              - matchScoreSeq: 947
+                                criteriaDetailType: "EXPRESSION_OF_ENERGY"
+                                scoringType:
+                                  nameEn: "Expression of energy"
+                                  nameKo: "기의 표현"
+                                  sortNo: 3
+                                score: 0.900
+                                criteriaDetailSubTypes: [ ]
+                    error: null
+                SCORING_NOT_COMPLETED:
+                  $ref: '../../components/examples.yaml#/SCORING_NOT_COMPLETED'
+                SENT_SCORE_UPDATE_NOT_ALLOWED_MATCH_END:
+                  $ref: '../../components/examples.yaml#/SENT_SCORE_UPDATE_NOT_ALLOWED_MATCH_END'
+                SCORE_CHANGED_BY_REFEREE:
+                  $ref: '../../components/examples.yaml#/SCORE_CHANGED_BY_REFEREE'
+                SCORE_MISMATCH:
+                  $ref: '../../components/examples.yaml#/SCORE_MISMATCH'
+                COMPETITOR_SIDE_TYPE_MISMATCH:
+                  $ref: '../../components/examples.yaml#/COMPETITOR_SIDE_TYPE_MISMATCH'
+                MATCH_COMPETITOR_DETAIL_NOT_FOUND:
+                  $ref: '../../components/examples.yaml#/MATCH_COMPETITOR_DETAIL_NOT_FOUND'
+                OUT_OF_SCORE_SCALE:
+                  $ref: '../../components/examples.yaml#/OUT_OF_SCORE_SCALE'
+                REQUIRED_TYPE_NOT_SCORED:
+                  $ref: '../../components/examples.yaml#/REQUIRED_TYPE_NOT_SCORED'
+                COMPETITION_MATCH_NOT_FOUND:
+                  $ref: '../../components/examples.yaml#/COMPETITION_MATCH_NOT_FOUND'
         403:
           description: Forbidden
           content:
