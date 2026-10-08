@@ -756,7 +756,7 @@
                       lastSyncTimeMillis:
                         type: integer
                         description:
-                          ' start, sync 할 때 현재시각 저장, stop 시 null (milliseconds 단위)'
+                          'start, sync 할 때 현재시각 저장, stop 시 null (milliseconds 단위)'
                         example: 1755058320128
                       accumulatedMillis:
                         type: integer
@@ -773,6 +773,11 @@
                         description:
                           'timer 연산 version'
                         example: 43
+                      serverTimeMillis:
+                        type: integer
+                        description:
+                          '서버에서 해당 메시지를 생성 한 시점 (milliseconds 단위)'
+                        example: 1755058320128
                   error:
                     nullable: true
                     example: null
@@ -786,7 +791,8 @@
                       "lastSyncTimeMillis": 1755058320128,
                       "accumulatedMillis": 52916,
                       "isRunning": true,
-                      "version": 43
+                      "version": 43,
+                      "serverTimeMillis": 1755058320128
                     }
 
         403:
@@ -876,6 +882,11 @@
                           type: integer
                           description: 'timer 연산 version'
                           example: 9
+                        serverTimeMillis:
+                          type: integer
+                          description:
+                            '서버에서 해당 메시지를 생성 한 시점 (milliseconds 단위)'
+                          example: 1755058320128
                   error:
                     nullable: true
                     example: null
@@ -890,7 +901,8 @@
                         "lastSyncTimeMillis": null,
                         "accumulatedMillis": 0,
                         "isRunning": false,
-                        "version": 9
+                        "version": 9,
+                        "serverTimeMillis": 1755058320128
                       },
                       {
                         "competitionMatchPsSeq": 60818,
@@ -898,7 +910,8 @@
                         "lastSyncTimeMillis": null,
                         "accumulatedMillis": 0,
                         "isRunning": false,
-                        "version": 29
+                        "version": 29,
+                        "serverTimeMillis": 1755058320128
                       }
                     ]
         403:
