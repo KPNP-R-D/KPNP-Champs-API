@@ -893,4 +893,13 @@ WITHDRAWN_PARTICIPANT_STATUS_CHANGE_DENIED:
       message: "탈퇴 유저는 상태변경이 불가합니다. 재참가를 원할 경우 신규 등록을 해주세요."
       errorCode: "E768"
 
+DUPLICATE_FOP_STATUS_REQUEST:
+  description: "같은 경기에 다른 FOP 전이가 처리 중이거나(이번 요청은 적용되지 않음) 현재와 같은 상태로의 중복 요청일 때"
+  value:
+    success: false
+    data: null
+    error:
+      message: "현재와 동일한 FOP 상태로의 중복 요청은 처리할 수 없습니다."
+      errorCode: "E764"
+
 

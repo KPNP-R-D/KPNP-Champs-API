@@ -94,6 +94,8 @@
                   $ref: '../../components/examples.yaml#/MISSING_COURT_ASSIGNMENT'
                 EXIST_WAITING_MATCHES:
                   $ref: '../../components/examples.yaml#/EXIST_WAITING_MATCHES'
+                DUPLICATE_FOP_STATUS_REQUEST:
+                  $ref: '../../components/examples.yaml#/DUPLICATE_FOP_STATUS_REQUEST'
 
         400:
           description: Bad Request
@@ -184,6 +186,8 @@
                     }
                 COMPETITION_MATCH_NOT_FOUND:
                   $ref: '../../components/examples.yaml#/COMPETITION_MATCH_NOT_FOUND'
+                DUPLICATE_FOP_STATUS_REQUEST:
+                  $ref: '../../components/examples.yaml#/DUPLICATE_FOP_STATUS_REQUEST'
 
         400:
           description: Bad Request
@@ -274,6 +278,8 @@
                     }
                 COMPETITION_MATCH_NOT_FOUND:
                   $ref: '../../components/examples.yaml#/COMPETITION_MATCH_NOT_FOUND'
+                DUPLICATE_FOP_STATUS_REQUEST:
+                  $ref: '../../components/examples.yaml#/DUPLICATE_FOP_STATUS_REQUEST'
 
         400:
           description: Bad Request

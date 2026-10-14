@@ -2550,6 +2550,8 @@
                   $ref: '../../components/examples.yaml#/CANNOT_DEDUCT_ZERO_PENALTY'
                 CANNOT_APPLY_PENALTY_WHEN_SCORE_IS_TWO:
                   $ref: '../../components/examples.yaml#/CANNOT_APPLY_PENALTY_WHEN_SCORE_IS_TWO'
+                DUPLICATE_FOP_STATUS_REQUEST:
+                  $ref: '../../components/examples.yaml#/DUPLICATE_FOP_STATUS_REQUEST'
         '403':
           description: 권한 없음
           content:
