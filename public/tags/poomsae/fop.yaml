@@ -13,7 +13,7 @@
         - name: status
           in: path
           required: true
-          description: FOP main status
+          description: FOP main status. SELECT_POOMSAE 는 select box 로 저장한 품새를 추첨 없이 DRAW_POOMSAE 화면으로 넘긴다(PRE_READY·DRAW_POOMSAE 에서만 호출)
           schema:
             type: string
             enum:
@@ -30,6 +30,7 @@
               - FINISH
               - REMATCH
               - RESET
+              - SELECT_POOMSAE
       requestBody:
         required: true
         content:
