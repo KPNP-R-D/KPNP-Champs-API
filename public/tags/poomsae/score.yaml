@@ -1005,6 +1005,8 @@
                   $ref: '../../components/examples.yaml#/COMPETITION_MATCH_REFEREE_NOT_ASSIGNED'
                 INSUFFICIENT_SCORE_FOR_DEDUCTION:
                   $ref: '../../components/examples.yaml#/INSUFFICIENT_SCORE_FOR_DEDUCTION'
+                ALREADY_SAVED_DATA:
+                  $ref: '../../components/examples.yaml#/ALREADY_SAVED_DATA'
                 SCORING_ALREADY_FINISHED:
                   $ref: '../../components/examples.yaml#/SCORING_ALREADY_FINISHED'
         403:
@@ -1199,6 +1201,8 @@
                   $ref: '../../components/examples.yaml#/COMPETITION_MATCH_REFEREE_NOT_ASSIGNED'
                 NO_DEDUCTION_TO_UNDO:
                   $ref: '../../components/examples.yaml#/NO_DEDUCTION_TO_UNDO'
+                ALREADY_SAVED_DATA:
+                  $ref: '../../components/examples.yaml#/ALREADY_SAVED_DATA'
                 SCORING_ALREADY_FINISHED:
                   $ref: '../../components/examples.yaml#/SCORING_ALREADY_FINISHED'
         403:
