@@ -1732,6 +1732,8 @@
                   $ref: '../../components/examples.yaml#/OUT_OF_SCORE_SCALE'
                 REQUIRED_TYPE_NOT_SCORED:
                   $ref: '../../components/examples.yaml#/REQUIRED_TYPE_NOT_SCORED'
+                INVALID_POOMSAE_SCORING_CRITERIA:
+                  $ref: '../../components/examples.yaml#/INVALID_POOMSAE_SCORING_CRITERIA'
                 SCORING_ALREADY_FINISHED:
                   $ref: '../../components/examples.yaml#/SCORING_ALREADY_FINISHED'
         403:
@@ -2340,6 +2342,8 @@
                   $ref: '../../components/examples.yaml#/OUT_OF_SCORE_SCALE'
                 REQUIRED_TYPE_NOT_SCORED:
                   $ref: '../../components/examples.yaml#/REQUIRED_TYPE_NOT_SCORED'
+                INVALID_POOMSAE_SCORING_CRITERIA:
+                  $ref: '../../components/examples.yaml#/INVALID_POOMSAE_SCORING_CRITERIA'
                 SCORING_ALREADY_FINISHED:
                   $ref: '../../components/examples.yaml#/SCORING_ALREADY_FINISHED'
         403:
@@ -3814,6 +3818,8 @@
                   $ref: '../../components/examples.yaml#/OUT_OF_SCORE_SCALE'
                 REQUIRED_TYPE_NOT_SCORED:
                   $ref: '../../components/examples.yaml#/REQUIRED_TYPE_NOT_SCORED'
+                INVALID_POOMSAE_SCORING_CRITERIA:
+                  $ref: '../../components/examples.yaml#/INVALID_POOMSAE_SCORING_CRITERIA'
                 SCORE_UPDATE_NOT_ALLOWED_TOURNAMENT:
                   $ref: '../../components/examples.yaml#/SCORE_UPDATE_NOT_ALLOWED_TOURNAMENT'
                 MATCH_RESULT_DRAW_CANNOT_DETERMINE_WINNER:
@@ -4755,6 +4761,8 @@
                   $ref: '../../components/examples.yaml#/OUT_OF_SCORE_SCALE'
                 REQUIRED_TYPE_NOT_SCORED:
                   $ref: '../../components/examples.yaml#/REQUIRED_TYPE_NOT_SCORED'
+                INVALID_POOMSAE_SCORING_CRITERIA:
+                  $ref: '../../components/examples.yaml#/INVALID_POOMSAE_SCORING_CRITERIA'
                 COMPETITION_MATCH_NOT_FOUND:
                   $ref: '../../components/examples.yaml#/COMPETITION_MATCH_NOT_FOUND'
         403:

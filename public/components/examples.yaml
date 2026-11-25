@@ -893,6 +893,15 @@ WITHDRAWN_PARTICIPANT_STATUS_CHANGE_DENIED:
       message: "탈퇴 유저는 상태변경이 불가합니다. 재참가를 원할 경우 신규 등록을 해주세요."
       errorCode: "E768"
 
+INVALID_POOMSAE_SCORING_CRITERIA:
+  description: "기준이 그 품새의 표시 기준이 아니거나(다른 품새의 기준 · SCORE_DEDUCTION — 심판 전송의 자유품새 SCORE_DEDUCTION 만 예외) 상세·하위 항목이 바깥 항목에 속하지 않을 때"
+  value:
+    success: false
+    data: null
+    error:
+      message: "품새 채점 기준에 맞지 않는 항목이 있습니다."
+      errorCode: "E769"
+
 DUPLICATE_FOP_STATUS_REQUEST:
   description: "같은 경기에 다른 FOP 전이가 처리 중이거나(이번 요청은 적용되지 않음) 현재와 같은 상태로의 중복 요청일 때"
   value:
