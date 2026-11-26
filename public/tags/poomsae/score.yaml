@@ -1281,7 +1281,7 @@
                         type: number
                         nullable: true
                         example: null
-                        description: 채점 항목 점수
+                        description: 채점 항목 점수. 공인품새 ACCURACY 는 요청 값을 검증만 하고 저장하지 않는다
                       criteriaDetailTypes:
                         type: array
                         description: 채점 상세 항목 목록
@@ -3812,6 +3812,8 @@
                   $ref: '../../components/examples.yaml#/MATCH_IS_NOT_END'
                 SCORE_CHANGED_BY_REFEREE:
                   $ref: '../../components/examples.yaml#/SCORE_CHANGED_BY_REFEREE'
+                NO_DEDUCTION_TO_UNDO:
+                  $ref: '../../components/examples.yaml#/NO_DEDUCTION_TO_UNDO'
                 SCORE_MISMATCH:
                   $ref: '../../components/examples.yaml#/SCORE_MISMATCH'
                 COMPETITOR_SIDE_TYPE_MISMATCH:
@@ -4755,6 +4757,8 @@
                   $ref: '../../components/examples.yaml#/SENT_SCORE_UPDATE_NOT_ALLOWED_MATCH_END'
                 SCORE_CHANGED_BY_REFEREE:
                   $ref: '../../components/examples.yaml#/SCORE_CHANGED_BY_REFEREE'
+                NO_DEDUCTION_TO_UNDO:
+                  $ref: '../../components/examples.yaml#/NO_DEDUCTION_TO_UNDO'
                 SCORE_MISMATCH:
                   $ref: '../../components/examples.yaml#/SCORE_MISMATCH'
                 COMPETITOR_SIDE_TYPE_MISMATCH:
